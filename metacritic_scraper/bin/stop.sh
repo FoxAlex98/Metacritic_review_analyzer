@@ -1,0 +1,1 @@
+docker stop metacritic_scraper
