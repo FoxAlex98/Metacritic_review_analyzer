@@ -5,7 +5,6 @@ import pandas as pd
 import progressbar
 
 def scrape_game_reviews(name, platform):
-    reviews = {"critic", "user"}
     url = "https://www.metacritic.com/game"
     url += "/" + platform
     url += "/" + parse_name(name)
@@ -13,17 +12,21 @@ def scrape_game_reviews(name, platform):
     try:
         req = requests.get(url, headers={'User-agent': 'Mozilla/5.0'})
         soup = BeautifulSoup(req.text, 'lxml')
-        try:
-            pages = soup.find("li","last_page")
-            if pages is None:
-                last_page = 1
-            else:
-                last_page = int(pages.text)
-        except ValueError as err:
-            last_page = int((soup.find("li","last_page").text).replace("…",""))
+        last_page = find_last_page(soup)
         scrape(url, last_page)
     except IndexError as err:
         print("ERROR " + str(err))
+
+def find_last_page(first_page):
+    try:
+        pages_num = first_page.find("li","last_page")
+        if pages_num is None:
+            last_page = 1
+        else:
+            last_page = int(pages_num.text)
+    except ValueError as err:
+        last_page = int((first_page.find("li","last_page").text).replace("…",""))
+    return last_page
 
 def parse_name(name):
     name = name.strip()

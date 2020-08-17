@@ -1,1 +1,1 @@
-docker stop metacritic_scraper
+docker stop mc_scraper

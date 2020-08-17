@@ -28,34 +28,25 @@ def parse_name(name):
     return name
 
 def get_score(page, details):
-    alinks = page.find_all("a","metascore_anchor")
-    #print(alinks)
-    for a in alinks:
-        if details['vote']['user'] == "" and "user" in a.div['class']:
-            details['vote']['user'] = get_user_score(a)
-        elif details['vote']['critic'] == "" and "large" in a.div['class']:
-            details['vote']['critic'] = get_critic_score(a)
-        elif details['vote']['user'] != "" and details['vote']['critic'] != "":
-            return
+    critic_score = page.select_one("div.metascore_wrap.feature_metascore")
+    get_critic_score(critic_score,details)
 
-    if details['vote']['critic'] == "":
-        details['vote']['critic'] = "no score yet"
-    if details['vote']['user'] == "":
-        details['vote']['user'] = "no score yet"
+    user_score = page.select_one("div.metascore_w.user.large.game")
+    get_user_score(user_score,details)
     
-def get_critic_score(tag):
-    try:
-        critic_score = int(tag.div.span.string)
-    except ValueError as err:
-        critic_score = "no score yet"
-    return critic_score
+def get_critic_score(critic_score,details):
+    critic_score = critic_score.a.div
+    if critic_score is not None:
+        details['vote']['critic'] = critic_score.text
+    else:
+        details['vote']['critic'] = "To be determined"
 
-def get_user_score(tag):
-    try:
-        user_score = float(tag.div.string)
-    except ValueError as err:
-        user_score = "no score yet"
-    return user_score
+def get_user_score(user_score,details):
+    if user_score is not None:
+        details['vote']['user'] = user_score.text
+        if user_score.text != "tbd":
+            return
+    details['vote']['user'] = "To be determined"
 
 def get_release_data(page):
     return page.find("li", "release_data").contents[3].string
