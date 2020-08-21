@@ -1,0 +1,5 @@
+*.zip
+*.tgz
+*/.vscode/*
+**/.settings/
+**/target/
