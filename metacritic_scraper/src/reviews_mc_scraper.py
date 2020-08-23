@@ -60,6 +60,7 @@ def scrape(url, last_page):
                     review_dict['review'].append(review.find('div', class_='review_body').find('span').text)
             except AttributeError as err:
                 review_dict['review'].append(" ")
+            #print(review_dict['rating']) send review
 
     bar.finish()
     user_reviews = pd.DataFrame(review_dict)

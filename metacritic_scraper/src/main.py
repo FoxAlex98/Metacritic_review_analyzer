@@ -13,6 +13,6 @@ scrape_game_details("overwatch", "pc")
 scrape_game_details("Factorio", "pc")
 scrape_game_details("godfall", "pc")
 
-#scrape_game_reviews("Factorio", "pc")
+scrape_game_reviews("overwatch", "pc")
 
 platforms = ["pc","playstation-4","xbox-one","playstation-3","xbox-360","playstation-2","xbox","playstation","psp","playstation-5","xbox-series-x","playstation-vita","switch","wii","wii-u","3ds","stadia","ios"]
