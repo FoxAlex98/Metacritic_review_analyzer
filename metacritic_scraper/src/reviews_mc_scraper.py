@@ -3,6 +3,13 @@ import lxml
 import requests
 import pandas as pd
 import progressbar
+from time import sleep
+from json import dumps
+from kafka import KafkaProducer
+
+producer = KafkaProducer(bootstrap_servers=['10.0.100.25:9092'],
+                         value_serializer=lambda x: 
+                         dumps(x).encode('utf-8'))
 
 def scrape_game_reviews(name, platform):
     url = "https://www.metacritic.com/game"
@@ -36,7 +43,7 @@ def parse_name(name):
     return name
 
 def scrape(url, last_page):
-    review_dict = {'name':[], 'date':[], 'rating':[], 'review':[]}
+    review_dict = {'name':"", 'date':"", 'rating':"", 'review':""}
     print(str(last_page) + " page to scan")
     bar = progressbar.ProgressBar(maxval=last_page, \
     widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
@@ -50,22 +57,22 @@ def scrape(url, last_page):
         for review in page.find_all('div', class_='review_content'):
             if review.find('div', class_='name') == None:
                 break 
-            review_dict['name'].append(review.find('div', class_='name').find('a').text)
-            review_dict['date'].append(review.find('div', class_='date').text)
-            review_dict['rating'].append(int(review.find('div', class_='review_grade').find_all('div')[0].text))
+            review_dict['name'] = review.find('div', class_='name').find('a').text
+            review_dict['date'] = review.find('div', class_='date').text
+            review_dict['rating'] = int(review.find('div', class_='review_grade').find_all('div')[0].text)
             try:
                 if review.find('span', class_='blurb blurb_expanded'):
-                    review_dict['review'].append(review.find('span', class_='blurb blurb_expanded').text)
+                    review_dict['review'] = review.find('span', class_='blurb blurb_expanded').text
                 else:
-                    review_dict['review'].append(review.find('div', class_='review_body').find('span').text)
+                    review_dict['review'] = review.find('div', class_='review_body').find('span').text
             except AttributeError as err:
-                review_dict['review'].append(" ")
-            #print(review_dict['rating']) send review
+                review_dict['review'] = ""
+            producer.send('numtest2', value=review_dict)
 
     bar.finish()
-    user_reviews = pd.DataFrame(review_dict)
+    #user_reviews = pd.DataFrame(review_dict)
 
-    print(user_reviews[['name','date','rating']])
+    #print(user_reviews[['name','date','rating']])
 
-    avg = float(sum(user_reviews['rating'])/len(user_reviews['rating']))
-    print(str(avg))
+    #avg = float(sum(user_reviews['rating'])/len(user_reviews['rating']))
+    #print(str(avg))
