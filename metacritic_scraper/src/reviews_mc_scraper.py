@@ -7,7 +7,7 @@ from time import sleep
 from json import dumps
 from kafka import KafkaProducer
 
-producer = KafkaProducer(bootstrap_servers=['10.0.100.25:9092'],
+producer = KafkaProducer(bootstrap_servers=['10.0.100.23:9092'],
                          value_serializer=lambda x: 
                          dumps(x).encode('utf-8'))
 
@@ -67,7 +67,11 @@ def scrape(url, last_page):
                     review_dict['review'] = review.find('div', class_='review_body').find('span').text
             except AttributeError as err:
                 review_dict['review'] = ""
+
+            print(review_dict['name'])            
             producer.send('numtest2', value=review_dict)
+            #TODO exception
+            #Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
 
     bar.finish()
     #user_reviews = pd.DataFrame(review_dict)

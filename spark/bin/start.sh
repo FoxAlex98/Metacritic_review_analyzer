@@ -1,7 +1,7 @@
-docker stop mc_spark
+docker stop mc-spark
 
-docker container rm mc_spark
+docker container rm mc-spark
 
-docker build .. --rm --tag tap:metacritic_spark
+docker build .. --rm --tag tap:metacritic-spark
 
-docker run --name mc_spark --network metacriticreviewanalyzer_tap tap:metacritic_spark
+docker run --name mc-spark --network metacriticreviewanalyzer_tap tap:metacritic-spark

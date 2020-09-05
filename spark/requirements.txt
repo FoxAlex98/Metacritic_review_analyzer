@@ -1,4 +1,5 @@
-pyspark
+pyspark==2.4.6 
+findspark
 numpy
 elasticsearch
 kafka-python

@@ -20,7 +20,18 @@ services:
             - 9092:9092
         networks: 
             tap:
-                ipv4_address: "10.0.100.25"
+                ipv4_address: "10.0.100.23"
+
+    spark:
+        build: spark/
+        container_name: "mc-spark"
+        depends_on: 
+            - zookeeper
+            - kafka
+        networks: 
+            tap:
+                ipv4_address: "10.0.100.28"
+        
     
 networks: 
     tap:
