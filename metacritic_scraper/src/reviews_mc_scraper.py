@@ -43,7 +43,7 @@ def parse_name(name):
     return name
 
 def scrape(url, last_page):
-    review_dict = {'name':"", 'date':"", 'rating':"", 'review':""}
+    review_dict = {'name':[], 'date':[], 'rating':[], 'review':[]}
     print(str(last_page) + " page to scan")
     bar = progressbar.ProgressBar(maxval=last_page, \
     widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
@@ -53,28 +53,30 @@ def scrape(url, last_page):
         bar.update(x+1)
         #print("scanning page number " + str(x+1))
         req = requests.get(url + "?page=" + str(x), headers={'User-agent': 'Mozilla/5.0'})
+        #TODO check connection
         page = BeautifulSoup(req.text, 'lxml')
         for review in page.find_all('div', class_='review_content'):
             if review.find('div', class_='name') == None:
                 break 
-            review_dict['name'] = review.find('div', class_='name').find('a').text
-            review_dict['date'] = review.find('div', class_='date').text
-            review_dict['rating'] = int(review.find('div', class_='review_grade').find_all('div')[0].text)
+            review_dict['name'].append(review.find('div', class_='name').find('a').text)
+            review_dict['date'].append(review.find('div', class_='date').text)
+            review_dict['rating'].append(int(review.find('div', class_='review_grade').find_all('div')[0].text))
             try:
                 if review.find('span', class_='blurb blurb_expanded'):
-                    review_dict['review'] = review.find('span', class_='blurb blurb_expanded').text
+                    review_dict['review'].append(review.find('span', class_='blurb blurb_expanded').text)
                 else:
-                    review_dict['review'] = review.find('div', class_='review_body').find('span').text
+                    review_dict['review'].append(review.find('div', class_='review_body').find('span').text)
             except AttributeError as err:
-                review_dict['review'] = ""
-
-            print(review_dict['name'])            
-            producer.send('numtest2', value=review_dict)
+                review_dict['review'].append("")
+                
+        user_reviews = pd.DataFrame(review_dict)
+        result = user_reviews.to_json(orient="records")
+        producer.send('numtest2', value=result)
+        sleep(3)
             #TODO exception
             #Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
 
     bar.finish()
-    #user_reviews = pd.DataFrame(review_dict)
 
     #print(user_reviews[['name','date','rating']])
 

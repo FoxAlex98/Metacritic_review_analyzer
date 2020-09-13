@@ -14,7 +14,7 @@ import json
 
 def cleaner(message):
     data = json.loads(message)
-    return data["review"]
+    return json.dumps(data, indent=4)
 
 sc = SparkContext(appName="Testing")
 sc.setLogLevel("WARN")
@@ -26,10 +26,14 @@ kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {'numte
 
 
 lines = kvs.map(lambda x: cleaner(x[1]))
+lines.pprint()
+
+'''
 count = lines.flatMap(lambda line: line.split(" ")) \
         .map(lambda word: (word, 1)) \
         .reduceByKey(lambda a, b: a+b)
 count.pprint()
+'''
 
 ssc.start()
 ssc.awaitTermination()
