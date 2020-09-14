@@ -9,12 +9,14 @@ spark = SparkSession\
         .appName("StructuredKafkaWordCount")\
         .getOrCreate()
 
+spark.sparkContext.setLogLevel("ERROR")
+
     # Create DataSet representing the stream of input lines from kafka
 lines = spark\
-        .read\
+        .readStream\
         .format("kafka")\
         .option("startingOffsets","earliest")\
-        .option("kafka.bootstrap.servers", "10.0.100.25:9092")\
+        .option("kafka.bootstrap.servers", "10.0.100.23:9092")\
         .option("subscribe", "numtest2")\
         .load()\
         .selectExpr("CAST(value AS STRING)")
@@ -27,9 +29,9 @@ wordCounts = words.groupBy('word').count()
 
     # Start running the query that prints the running counts to the console
 query = wordCounts\
-        .writeStream\
-        .outputMode('complete')\
-        .format('console')\
-        .start()
+           .writeStream\
+           .outputMode('complete')\
+           .format('console')\
+           .start()
 
 query.awaitTermination()

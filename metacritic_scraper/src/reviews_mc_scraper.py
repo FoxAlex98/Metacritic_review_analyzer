@@ -43,13 +43,13 @@ def parse_name(name):
     return name
 
 def scrape(url, last_page):
-    review_dict = {'name':[], 'date':[], 'rating':[], 'review':[]}
     print(str(last_page) + " page to scan")
     bar = progressbar.ProgressBar(maxval=last_page, \
     widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
 
     for x in range(last_page):
+        review_dict = {'name':[], 'date':[], 'rating':[], 'review':[]}
         bar.update(x+1)
         #print("scanning page number " + str(x+1))
         req = requests.get(url + "?page=" + str(x), headers={'User-agent': 'Mozilla/5.0'})
