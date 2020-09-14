@@ -32,7 +32,7 @@ def message_processing(key, rdd):
         analyzed_rdd = message.rdd.map(lambda review: get_review(review))
         print("\n\n\n\n") 
         print(spark.createDataFrame(analyzed_rdd).show())
-
+    #elastic search
 
 spark = SparkSession.builder.appName("Testing").getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
