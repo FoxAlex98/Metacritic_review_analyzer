@@ -5,3 +5,4 @@ elasticsearch
 kafka-python
 kafka
 pandas
+langdetect

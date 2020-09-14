@@ -12,6 +12,7 @@ from pyspark.sql import functions as F
 from pyspark.sql import Row
 import json
 import datetime
+from langdetect import detect
 
 global spark
 
@@ -20,11 +21,15 @@ def get_review(_review):
             'name': _review['name'],
             'rating': int(_review['rating']),
             'date': get_date(_review['date']).date(),
+            'language': get_language(_review['review'])
             #'review': _review['review']
         }
 
 def get_date(date):
     return datetime.datetime.strptime(date, '%b %d, %Y')
+
+def get_language(review):
+    return detect(review)
 
 def message_processing(key, rdd):
     message = spark.read.json(rdd.map(lambda value: json.loads(value[1])))
