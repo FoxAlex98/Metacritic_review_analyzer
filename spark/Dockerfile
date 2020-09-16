@@ -20,7 +20,7 @@ ADD setup/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz /opt
 # Create Sym Link 
 RUN ln -s /opt/spark-${SPARK_VERSION}-bin-hadoop2.7 ${SPARK_DIR} 
 
-#COPY elasticsearch-hadoop-7.8.0.jar ${SPARK_DIR}/
+COPY setup/elasticsearch-hadoop-7.9.1.jar ${SPARK_DIR}/
 
 COPY code/*  /opt/tap/code/
 

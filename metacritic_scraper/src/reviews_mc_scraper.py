@@ -59,16 +59,16 @@ def scrape(url, last_page):
         for review in page.find_all('div', class_='review_content'):
             if review.find('div', class_='name') == None:
                 break 
-            review_dict['name'] = (review.find('div', class_='name').find('a').text)
-            review_dict['date'] = (review.find('div', class_='date').text)
-            review_dict['rating'] = (int(review.find('div', class_='review_grade').find_all('div')[0].text))
+            review_dict['name'] = review.find('div', class_='name').find('a').text
+            review_dict['date'] = review.find('div', class_='date').text
+            review_dict['rating'] = int(review.find('div', class_='review_grade').find_all('div')[0].text)
             try:
                 if review.find('span', class_='blurb blurb_expanded'):
-                    review_dict['review'] = (review.find('span', class_='blurb blurb_expanded').text)
+                    review_dict['review'] = review.find('span', class_='blurb blurb_expanded').text
                 else:
-                    review_dict['review'] = (review.find('div', class_='review_body').find('span').text)
+                    review_dict['review'] = review.find('div', class_='review_body').find('span').text
             except AttributeError as err:
-                review_dict['review'] = ("")
+                review_dict['review'] = ""
             producer.send('numtest2', value=review_dict)
             count+=1
             #TODO exception
