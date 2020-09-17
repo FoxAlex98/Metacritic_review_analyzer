@@ -28,11 +28,14 @@ def get_review(_review):
     return {
             'name': _review['name'],
             'rating': _review['rating'],
-            #'date': get_date(_review),
-            'language': get_language(_review)
-            #'review': _review['review']
+            'date': get_date(_review),
+            'language': get_language(_review),
+            'review': clean_review(_review)
             #'valid': get_valid()
             }
+
+def clean_review(review):
+    return review['review'].replace('\r',' ')
 
 def get_date(review):
     try:
@@ -42,7 +45,7 @@ def get_date(review):
         print("///////////////////////////")
         print(err)
         print("review " + str(review))
-        return datetime.now()
+        return datetime.datetime.now()
 
 
 def get_language(review):
@@ -55,8 +58,15 @@ def get_language(review):
         print("review " + str(review))
         return "NaN"
 
+enco = lambda obj: (
+    obj.isoformat()
+    if isinstance(obj, datetime.datetime)
+    or isinstance(obj, datetime.date)
+    else None
+)
+
 def message_processing(key, rdd):
-    message = spark.read.json(rdd.map(lambda value: json.loads(value[1])))
+    message = spark.read.option("mode", "DROPMALFORMED").json(rdd.map(lambda value: json.loads(value[1])))
     if not message.rdd.isEmpty():        
         analyzed_rdd = message.rdd.map(lambda review: get_review(review))
         print("\n\n\n\n") 
@@ -64,7 +74,7 @@ def message_processing(key, rdd):
         print("-----------------------------")
 
         #elastic search
-        elastic_rdd = analyzed_rdd.map(lambda item: json.dumps(item)).map(lambda x: ('key', x))
+        elastic_rdd = analyzed_rdd.map(lambda item: json.dumps(item, default=enco)).map(lambda x: ('key', x))
 
         elastic_rdd.saveAsNewAPIHadoopFile(
             path='-',
