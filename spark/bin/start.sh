@@ -1,3 +1,9 @@
+rm ../utils.zip
+pushd ../code/utils/
+ls
+zip -r ../../utils.zip ./
+popd
+
 docker stop mc-spark
 
 docker container rm mc-spark

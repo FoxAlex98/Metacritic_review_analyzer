@@ -22,7 +22,8 @@ RUN ln -s /opt/spark-${SPARK_VERSION}-bin-hadoop2.7 ${SPARK_DIR}
 
 COPY setup/elasticsearch-hadoop-7.9.1.jar ${SPARK_DIR}/
 
-COPY code/*  /opt/tap/code/
+COPY code/consumer.py  /opt/tap/code/
+COPY utils.zip /opt/tap/code/
 
 # Add Spark Starter
 COPY spark-starter.sh $SPARK_DIR/bin/

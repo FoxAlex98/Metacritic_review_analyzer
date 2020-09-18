@@ -12,93 +12,36 @@ from pyspark.sql import functions as F
 from pyspark.sql import Row
 import json
 import datetime
-from langdetect import detect
 from elasticsearch import Elasticsearch
+import data_extractors as dext
+import configuration as conf
 
 global spark
-
-es_write_conf = {
-"es.nodes" : "10.0.100.51",
-"es.port" : "9200",
-"es.resource" : '%s/%s' % ("metacritic","_doc"),
-"es.input.json" : "yes"
-}
-
-def get_review(_review):
-    return {
-            'name': _review['name'],
-            'rating': _review['rating'],
-            'date': get_date(_review),
-            'language': get_language(_review),
-            'review': clean_review(_review)
-            #'valid': get_valid()
-            }
-
-def clean_review(review):
-    return review['review'].replace('\r',' ')
-
-def get_date(review):
-    try:
-        date = review['date']
-        return datetime.datetime.strptime(date, '%b %d, %Y')
-    except TypeError as err:
-        print("///////////////////////////")
-        print(err)
-        print("review " + str(review))
-        return datetime.datetime.now()
-
-
-def get_language(review):
-    try:
-        text = review['review']
-        return detect(text)
-    except TypeError as err:
-        print("///////////////////////////")
-        print(err)
-        print("review " + str(review))
-        return "NaN"
-
-enco = lambda obj: (
-    obj.isoformat()
-    if isinstance(obj, datetime.datetime)
-    or isinstance(obj, datetime.date)
-    else None
-)
 
 def message_processing(key, rdd):
     message = spark.read.option("mode", "DROPMALFORMED").json(rdd.map(lambda value: json.loads(value[1])))
     if not message.rdd.isEmpty():        
-        analyzed_rdd = message.rdd.map(lambda review: get_review(review))
+        analyzed_rdd = message.rdd.map(lambda review: dext.get_review(review))
         print("\n\n\n\n") 
         print(spark.createDataFrame(analyzed_rdd).show())
         print("-----------------------------")
 
         #elastic search
-        elastic_rdd = analyzed_rdd.map(lambda item: json.dumps(item, default=enco)).map(lambda x: ('key', x))
+        elastic_rdd = analyzed_rdd.map(lambda item: json.dumps(item, default=conf.enco)).map(lambda x: ('key', x))
 
         elastic_rdd.saveAsNewAPIHadoopFile(
             path='-',
             outputFormatClass="org.elasticsearch.hadoop.mr.EsOutputFormat",
             keyClass="org.apache.hadoop.io.NullWritable",
             valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
-            conf=es_write_conf)  
+            conf=conf.es_write_conf)  
 
-
-mapping = {
-    "mappings": {
-        "properties": {
-            "timestamp": {
-                "type": "date"
-            }
-        }
-    }
-}
 
 elastic = Elasticsearch(hosts=["10.0.100.51"])
 
 response = elastic.indices.create(
     index="metacritic",
-    body=mapping,
+    body=conf.mapping,
     ignore=400
 )
 
