@@ -41,7 +41,7 @@ elastic = Elasticsearch(hosts=["10.0.100.51"])
 
 response = elastic.indices.create(
     index="metacritic",
-    body=conf.mapping,
+    body=conf.body,
     ignore=400
 )
 
