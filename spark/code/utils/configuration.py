@@ -32,8 +32,10 @@ body = {
             "review": { "type": "text", "fielddata": True, "analyzer": "english_stop"}, 
             "language": { "type": "text" },
             "name": { "type": "text" },
+            "platform": { "type": "text" },
             "rating": {"type":"long"},
             "sentiment": {"type":"text"},
+            "validy": {"type":"text"},
             "date": {"type": "date"}
         }
     }
