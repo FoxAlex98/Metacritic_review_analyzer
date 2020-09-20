@@ -1,3 +1,5 @@
+#not used in this project
+
 from bs4 import BeautifulSoup
 import lxml
 import requests

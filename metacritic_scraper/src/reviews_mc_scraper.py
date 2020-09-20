@@ -20,7 +20,7 @@ def scrape_game_reviews(name, platform):
         req = requests.get(url, headers={'User-agent': 'Mozilla/5.0'})
         soup = BeautifulSoup(req.text, 'lxml')
         last_page = find_last_page(soup)
-        scrape(url, last_page)
+        scrape(url, last_page, platform)
     except IndexError as err:
         print("ERROR " + str(err))
 
@@ -42,7 +42,7 @@ def parse_name(name):
     name = name.replace(" ","-")
     return name
 
-def scrape(url, last_page):
+def scrape(url, last_page, platform):
     print(str(last_page) + " page to scan")
     bar = progressbar.ProgressBar(maxval=last_page, \
     widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
@@ -50,8 +50,7 @@ def scrape(url, last_page):
 
     count = 0
     for x in range(last_page):
-        review_dict = {'name':'', 'date':'', 'rating':'', 'review':''}
-        bar.update(x+1)
+        review_dict = {'name':'', 'date':'', 'rating':'', 'review':'', 'platform':platform}
         #print("scanning page number " + str(x+1))
         req = requests.get(url + "?page=" + str(x), headers={'User-agent': 'Mozilla/5.0'})
         #TODO check connection
@@ -59,7 +58,10 @@ def scrape(url, last_page):
         for review in page.find_all('div', class_='review_content'):
             if review.find('div', class_='name') == None:
                 break 
-            review_dict['name'] = review.find('div', class_='name').find('a').text
+            try:
+                review_dict['name'] = review.find('div', class_='name').find('a').text
+            except AttributeError as err:
+                review_dict['name'] = review.find('div', class_='name').find('span').text
             review_dict['date'] = review.find('div', class_='date').text
             review_dict['rating'] = int(review.find('div', class_='review_grade').find_all('div')[0].text)
             try:
@@ -69,15 +71,15 @@ def scrape(url, last_page):
                     review_dict['review'] = review.find('div', class_='review_body').find('span').text
             except AttributeError as err:
                 review_dict['review'] = ""
-            producer.send('numtest2', value=review_dict)
+            #producer.send('numtest2', value=review_dict)
             count+=1
             #TODO exception
             #Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+        bar.update(x+1)
 
     bar.finish()
     print(count)
 
-    #print(user_reviews[['name','date','rating']])
 
     #avg = float(sum(user_reviews['rating'])/len(user_reviews['rating']))
     #print(str(avg))
