@@ -22,9 +22,10 @@ def message_processing(key, rdd):
     message = spark.read.option("mode", "DROPMALFORMED").json(rdd.map(lambda value: json.loads(value[1])))
     if not message.rdd.isEmpty():        
         analyzed_rdd = message.rdd.map(lambda review: dext.get_review(review))
-        print("\n\n\n\n") 
-        print(spark.createDataFrame(analyzed_rdd).show())
-        print("-----------------------------")
+        
+        #print("\n\n\n\n") 
+        #print(spark.createDataFrame(analyzed_rdd).show())
+        #print("-----------------------------")
 
         #elastic search
         elastic_rdd = analyzed_rdd.map(lambda item: json.dumps(item, default=conf.enco)).map(lambda x: ('key', x))
@@ -37,10 +38,10 @@ def message_processing(key, rdd):
             conf=conf.es_write_conf)  
 
 
-elastic = Elasticsearch(hosts=["10.0.100.51"])
+elastic = Elasticsearch(hosts=[conf.ES])
 
 response = elastic.indices.create(
-    index="metacritic",
+    index=conf.index,
     body=conf.body,
     ignore=400
 )
@@ -55,13 +56,12 @@ elif 'error' in response:
 
 
 
-spark = SparkSession.builder.appName("Testing").getOrCreate()
+spark = SparkSession.builder.appName("Metacritic").getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
 ssc = StreamingContext(spark.sparkContext, 3)
 
-zkQuorum="10.0.100.22:2181"
-topic = "numtest2"
-kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {'numtest2': 1})
+
+kvs = KafkaUtils.createStream(ssc, conf.zkQuorum, "spark-streaming-consumer", {conf.topic: 1})
 
 kvs.foreachRDD(message_processing)
 

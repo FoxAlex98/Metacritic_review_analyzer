@@ -71,7 +71,7 @@ def scrape(url, last_page, platform):
                     review_dict['review'] = review.find('div', class_='review_body').find('span').text
             except AttributeError as err:
                 review_dict['review'] = ""
-            #producer.send('numtest2', value=review_dict)
+            producer.send('metacritic', value=review_dict)
             count+=1
             #TODO exception
             #Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
