@@ -4,3 +4,4 @@
 **/.settings/
 **/target/
 testing/*
+**/.ipynb_checkpoints
