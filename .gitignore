@@ -5,3 +5,4 @@
 **/target/
 testing/*
 **/settings.yaml
+**/.ipynb_checkpoints
