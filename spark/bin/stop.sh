@@ -1,1 +1,1 @@
-docker stop mc_spark
+docker stop mc-spark

@@ -12,7 +12,7 @@ def get_review(_review):
             'date': get_date(_review),
             'language': language,
             'sentiment': sentim,
-            'validy': sent.get_validy(sentim, _review['rating']),
+            'validy': sent.get_validy(sentim, _review['rating'], _review['review']),
             'review': clean_review(_review)
             }
 
@@ -24,5 +24,8 @@ def get_date(review):
     return datetime.datetime.strptime(date, '%b %d, %Y').date()
 
 def get_language(review):
-    text = review['review']
-    return detect(text)
+    try:
+        text = review['review']
+        return detect(text)
+    except:
+        return "NC"#not classified

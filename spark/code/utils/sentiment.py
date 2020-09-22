@@ -38,6 +38,8 @@ def filter_review_eng(language, review):
     return "NIE" #Not in English
 
 def get_sentiment(phrase):
+    if phrase.strip() is "":
+        return "NC"
     polarity = analyzer.polarity_scores(phrase)         
     if polarity["compound"] >= 0.05:
         return 'positive'
@@ -46,10 +48,10 @@ def get_sentiment(phrase):
     else:
         return 'mixed'
 
-def get_validy(sentiment, rating):
+def get_validy(sentiment, rating, review):
     if sentiment == 'NIE':
         return 'NIE'
-    elif (sentiment == 'positive' and rating < 3) or (sentiment == 'negative' and rating > 7):
+    elif (review.strip == "") or (sentiment == 'positive' and rating < 3) or (sentiment == 'negative' and rating > 7):
         return 'troll'
     else:
         return 'normal'

@@ -38,6 +38,7 @@ def find_last_page(first_page):
 def parse_name(name):
     name = name.strip()
     name = name.lower()
+    name = name.replace("'s","s")
     name = name.replace(": ","-")
     name = name.replace(" ","-")
     return name
